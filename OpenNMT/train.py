@@ -151,8 +151,6 @@ def eval(model, criterion, data):
 def trainModel(model, trainData, validData, dataset, optim):
     print(model)
     model.train()
-    for p in model.parameters():
-        p.data.uniform_(-opt.param_init, opt.param_init)
 
     # define criterion of each GPU
     criterion = NMTCriterion(dataset['dicts']['tgt'].size())
@@ -253,6 +251,9 @@ def main():
             nn.LogSoftmax())
         model = onmt.Models.NMTModel(encoder, decoder, generator)
 
+        for p in model.parameters():
+            p.data.uniform_(-opt.param_init, opt.param_init)
+
         optim = onmt.Optim(
             model.parameters(), opt.optim, opt.learning_rate, opt.max_grad_norm,
             lr_decay=opt.learning_rate_decay,
@@ -263,7 +264,7 @@ def main():
         checkpoint = torch.load(opt.train_from)
         model = checkpoint['model']
         optim = checkpoint['optim']
-        opt.start_epoch = checkpoint['epoch']
+        opt.start_epoch = checkpoint['epoch'] + 1
 
     if opt.cuda:
         model.cuda()
